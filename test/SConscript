@@ -1,0 +1,26 @@
+# -*- python -*-
+
+tools = Split("""
+doxygen
+logx
+Pentek_xx821
+boost_program_options
+""")
+
+allsources = []
+allheaders = []
+
+toggle_xx821_sources = Split("""
+toggle_xx821_leds.cpp
+""")
+allsources += toggle_xx821_sources
+env = Environment(tools = ['default'] + tools)
+
+html = env.Apidocs(allsources + allheaders)
+Default(html)
+
+#apar_info_xx821 = env.Program('apar_info_xx821', 'apar_info_xx821.cpp')
+#Default(apar_info_xx821)
+
+toggle_xx821_leds = env.Program('toggle_xx821_leds', toggle_xx821_sources)
+Default(toggle_xx821_leds)
