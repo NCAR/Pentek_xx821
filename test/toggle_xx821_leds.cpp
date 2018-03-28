@@ -1,25 +1,25 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-// ** Copyright UCAR (c) 2018                                         
-// ** University Corporation for Atmospheric Research (UCAR)                 
-// ** National Center for Atmospheric Research (NCAR)                        
-// ** Boulder, Colorado, USA                                                 
-// ** BSD licence applies - redistribution and use in source and binary      
-// ** forms, with or without modification, are permitted provided that       
-// ** the following conditions are met:                                      
-// ** 1) If the software is modified to produce derivative works,            
-// ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from UCAR.                    
-// ** 2) Redistributions of source code must retain the above copyright      
-// ** notice, this list of conditions and the following disclaimer.          
-// ** 3) Redistributions in binary form must reproduce the above copyright   
-// ** notice, this list of conditions and the following disclaimer in the    
-// ** documentation and/or other materials provided with the distribution.   
-// ** 4) Neither the name of UCAR nor the names of its contributors,         
-// ** if any, may be used to endorse or promote products derived from        
-// ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
+// Copyright UCAR (c) 2018
+// University Corporation for Atmospheric Research (UCAR)
+// National Center for Atmospheric Research (NCAR)
+// Boulder, Colorado, USA
+// BSD licence applies - redistribution and use in source and binary
+// forms, with or without modification, are permitted provided that
+// the following conditions are met:
+// 1) If the software is modified to produce derivative works,
+// such modified software should be clearly marked, so as not
+// to confuse it with the version available from UCAR.
+// 2) Redistributions of source code must retain the above copyright
+// notice, this list of conditions and the following disclaimer.
+// 3) Redistributions in binary form must reproduce the above copyright
+// notice, this list of conditions and the following disclaimer in the
+// documentation and/or other materials provided with the distribution.
+// 4) Neither the name of UCAR nor the names of its contributors,
+// if any, may be used to endorse or promote products derived from
+// this software without specific prior written permission.
+// DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS
+// OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 #include <iostream>
 #include <cstring>
@@ -38,41 +38,38 @@ int _nCycles = 50;          ///< number of times leds are cycled
 double _cyclePeriod = 0.2;  ///< cycle period (secs)
 bool _exitNow = false;      ///< early exit if this becomes true
 
-
 /// Parse the command line options
 void parseOptions(int argc, char** argv)
 {
-  
-  // get the options
-  po::options_description descripts("Options");
-  descripts.add_options()
-    ("help", "Describe options")
-    ("nCycles", po::value<int>(&_nCycles), "# of times to cycle LEDs [50]")
-    ("cyclePeriod", po::value<double>(&_cyclePeriod), "Cycle period, s [0.2]")
-    ;
 
-  po::variables_map vm;
-  po::command_line_parser parser(argc, argv);
-  po::positional_options_description pd;
-  po::store(parser.options(descripts).positional(pd).run(), vm);
-  po::notify(vm);
-  
-  if (vm.count("help")) {
-    cout << "Usage: " << argv[0] << 
-      " [OPTION]..." << endl;
-    cout << descripts << endl;
-    exit(0);
-  }
-  
+    // get the options
+    po::options_description descripts("Options");
+    descripts.add_options()
+            ("help", "Describe options")
+            ("nCycles", po::value<int>(&_nCycles), "# of times to cycle LEDs [50]")
+            ("cyclePeriod", po::value<double>(&_cyclePeriod), "Cycle period, s [0.2]")
+            ;
+
+    po::variables_map vm;
+    po::command_line_parser parser(argc, argv);
+    po::positional_options_description pd;
+    po::store(parser.options(descripts).positional(pd).run(), vm);
+    po::notify(vm);
+
+    if (vm.count("help")) {
+        cout << "Usage: " << argv[0] <<
+                " [OPTION]..." << endl;
+        cout << descripts << endl;
+        exit(0);
+    }
 }
 
-// Interrupt handler to trigger early exit
+/// Interrupt handler to trigger early exit
 void
 onInterrupt(int signal) {
     ILOG << "Exiting early on " << strsignal(signal) << " signal";
     _exitNow = true;
 }
-
 
 int
 main(int argc, char** argv)
@@ -129,8 +126,11 @@ main(int argc, char** argv)
 
     // Alternately light the user (USR) LED and clock master (MAS) LED
     // _nCycles times.
-    ILOG << "Cycling LEDs " << _nCycles << " times @ " << _cyclePeriod <<
-            "s per cycle (total time " << _nCycles * _cyclePeriod << " s)...";
+    ILOG << "LEDs will cycle " << _nCycles << " times @ " << _cyclePeriod <<
+            " s/cycle";
+    ILOG << "(Total time " << _nCycles * _cyclePeriod << " s)";
+    ILOG << "Running...";
+
     for (int t = 0; t < _nCycles; t++) {
         // user LED
         NAVip_BrdInfoRegs_UserLed_SetUserLedEnable(BAR0Base,
