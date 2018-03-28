@@ -34,9 +34,9 @@ namespace po = boost::program_options;
 
 LOGGING("toggle_xx821_leds")
 
-int _nToggles = 50;     ///< number of times leds are toggled
-double _waitSecs = 0.2; ///< delay between toggles (secs)
-bool _exitNow = false;  ///< early exit if this becomes true
+int _nCycles = 50;          ///< number of times leds are cycled
+double _cyclePeriod = 0.2;  ///< cycle period (secs)
+bool _exitNow = false;      ///< early exit if this becomes true
 
 
 /// Parse the command line options
@@ -47,10 +47,8 @@ void parseOptions(int argc, char** argv)
   po::options_description descripts("Options");
   descripts.add_options()
     ("help", "Describe options")
-    ("nToggles", po::value<int>(&_nToggles),
-     "Number of times lights are toggled [50]")
-    ("waitSecs", po::value<double>(&_waitSecs), 
-     "Toggle period in seconds [0.2]")
+    ("nCycles", po::value<int>(&_nCycles), "# of times to cycle LEDs [50]")
+    ("cyclePeriod", po::value<double>(&_cyclePeriod), "Cycle period, s [0.2]")
     ;
 
   po::variables_map vm;
@@ -121,43 +119,40 @@ main(int argc, char** argv)
         exit(1);
     }
 
-    // Alternately light the green user (USR) LED and amber master (MAS) LED
-    // _nToggles times.
+    // BAR0 base for register access
     volatile uint32_t * BAR0Base =
-            reinterpret_cast<volatile uint32_t *>(boardResource->pciInfo.BAR0Base);
+                reinterpret_cast<volatile uint32_t *>(boardResource->pciInfo.BAR0Base);
 
-    for (int t = 0; t < _nToggles; t++) {
-        ILOG << "Cycle " << t + 1 << " of " << _nToggles;
-        // USR LED on/MAS LED off for half of the toggle period
+    // Calculate the 'on' time for each LED in the cycle, in microseconds
+    int nLeds = 2;
+    int onTimeUsecs = int(1.0e6 * _cyclePeriod / nLeds);
+
+    // Alternately light the user (USR) LED and clock master (MAS) LED
+    // _nCycles times.
+    ILOG << "Cycling LEDs " << _nCycles << " times @ " << _cyclePeriod <<
+            "s per cycle (total time " << _nCycles * _cyclePeriod << " s)...";
+    for (int t = 0; t < _nCycles; t++) {
+        // user LED
         NAVip_BrdInfoRegs_UserLed_SetUserLedEnable(BAR0Base,
             NAV_IP_BRD_INFO_USER_LED_CTRL_USER_LED_ON);
-        NAV820_BusSetup(boardResource,
-                        NAV_BUS_MSTR_STAND_ALONE,
-                        NAV_BUS_MSTR_STAND_ALONE);
-        usleep(1000000 * (0.5 * _waitSecs));
+        usleep(onTimeUsecs);
+        NAVip_BrdInfoRegs_UserLed_SetUserLedEnable(BAR0Base,
+            NAV_IP_BRD_INFO_USER_LED_CTRL_USER_LED_OFF);
         if (_exitNow) {
             break;
         }
 
-        // USR LED off/MAS LED on for half of the toggle period
-        NAVip_BrdInfoRegs_UserLed_SetUserLedEnable(BAR0Base,
-            NAV_IP_BRD_INFO_USER_LED_CTRL_USER_LED_OFF);
-        NAV820_BusSetup(boardResource, NAV_BUS_MSTR_STAND_ALONE,
-                        NAV_BUS_MSTR_STAND_ALONE);
-        status = NAV820_BusSetup(boardResource,
-                                 NAV_BUS_MSTR_MASTER,
-                                 NAV_BUS_MSTR_MASTER);
-        usleep(1000000 * (0.5 * _waitSecs));
+        // clock master LED
+        NAV820_BusSetup(boardResource,
+                        NAV_BUS_MSTR_MASTER, NAV_BUS_MSTR_MASTER);
+        usleep(onTimeUsecs);
+        NAV820_BusSetup(boardResource,
+                        NAV_BUS_MSTR_STAND_ALONE, NAV_BUS_MSTR_STAND_ALONE);
         if (_exitNow) {
             break;
         }
     }
-
-    // Make sure the LEDs are off before we exit
-    NAVip_BrdInfoRegs_UserLed_SetUserLedEnable(BAR0Base,
-        NAV_IP_BRD_INFO_USER_LED_CTRL_USER_LED_OFF);
-    NAV820_BusSetup(boardResource, NAV_BUS_MSTR_STAND_ALONE,
-                    NAV_BUS_MSTR_STAND_ALONE);
+    ILOG << "Done";
 
     // Release the board and close Navigator cleanly
     NAV_BoardClose(boardResource);
