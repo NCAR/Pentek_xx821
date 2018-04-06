@@ -6,8 +6,6 @@ import eol_scons
 # Any environment setting will be the default, but it can be overridden by
 # setting the configuration variable.
 
-variables = eol_scons.GlobalVariables()
-
 requiredTools = [
     'logx',
     'Navigator_xx821', # Pentek's Navigator BSP
@@ -15,15 +13,18 @@ requiredTools = [
 ]
 
 env = Environment(tools = ['default'] + requiredTools)
-
+variables = eol_scons.GlobalVariables()
 variables.Update(env)
 
+# This library must be compiled with C++11 enabled
+env.AppendUnique(CXXFLAGS=['-std=c++11'])
+
 libsources = Split("""
-Pentek_xx821.cpp
+p_xx821.cpp
 """)
 
 headers = Split("""
-Pentek_xx821.h
+p_xx821.h
 """)
 
 libpentek = env.Library('Pentek_xx821', libsources)
