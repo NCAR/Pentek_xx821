@@ -86,34 +86,35 @@ p_xx821::p_xx821(uint boardNum) :
         os << "NAV_BoardOpen error opening board " << _boardNum;
         throw ConstructError(os.str());
     }
-    ILOG << "Opened Pentek xx821 board " << _boardNum;
 
     // DMA reads by Pentek boards apparently always fail if PCIe 'max read
     // request size' is 4096 bytes. (E.g., Pentek Navigator's 'transmit_dma'
     // example program will fail with DMA timeouts). Detect that case now,
     // and warn the user that if the board attempts any DMA reads, they will
     // fail.
-    uint32_t maxRdReqSzStat;
-    status = NAVip_BrdInfoRegs_PcieLinkStat_GetLinkStat(_baseBAR0(),
-            NAV_IP_BRD_INFO_PCIE_LINK_STAT_MAX_RD_REQ_SZ,
-            &maxRdReqSzStat);
-    if (maxRdReqSzStat == NAV_IP_BRD_INFO_PCIE_LINK_STAT_MAX_RD_REQ_SZ_4096_BYTES) {
-        WLOG << "";
-        WLOG << "XXXXXXXXXXXXXXXXXXXXXX";
-        WLOG << "PCIe 'max read request size' for Pentek " << _boardNum;
-        WLOG << "is 4096 bytes. A Pentek bug will cause any";
-        WLOG << "DMA reads initiated by the board to time out";
-        WLOG << "in this case. If DMA reads are required,";
-        WLOG << "adjust PCIe 'max read request size' in the";
-        WLOG << "computer's BIOS settings to be 2048 bytes or";
-        WLOG << "smaller.";
-        WLOG << "XXXXXXXXXXXXXXXXXXXXXX";
+    uint32_t junk;
+    uint32_t maxReadReqSize;
+    status = NAV_GetPcieLinkStatus(_boardHandle, &junk, &junk, &junk,
+                                   &maxReadReqSize, &junk);
+    if (maxReadReqSize == 4096) {
+        WLOG << "_______________________";
+        WLOG << "|";
+        WLOG << "| PCIe 'max read request size' for board " << _boardNum;
+        WLOG << "| is 4096 bytes. A Pentek bug will cause any";
+        WLOG << "| DMA reads initiated by the board to time out";
+        WLOG << "| in this case. If DMA reads are required,";
+        WLOG << "| adjust PCIe 'max read request size' in the";
+        WLOG << "| computer's BIOS settings to be 2048 bytes or";
+        WLOG << "| smaller.";
+        WLOG << "|______________________";
         WLOG << "";
     } else {
-        DLOG << "PCIe 'max read request size' bits for board " << _boardNum <<
-                ": 0x" << std::hex << maxRdReqSzStat;
+        DLOG << "PCIe 'max read request size' for board " << _boardNum <<
+                " is " << maxReadReqSize << " bytes";
     }
+
     // We're good, so increment the _InstanceCount.
+    ILOG << "Opened Pentek xx821 board " << _boardNum;
     _InstanceCount++;
 }
 
