@@ -91,6 +91,13 @@ main(int argc, char** argv)
         exit(1);
     }
 
+    status = NAV_BoardStartup();
+    if (status != NAV_STAT_OK)
+    {
+        ELOG << "Error initializing Navigator board support package!";
+        exit(1);
+    }
+
     // Find all Pentek boards in the system
     NAV_DEVICE_INFO *boardList[NAV_MAX_BOARDS];
 
@@ -117,7 +124,7 @@ main(int argc, char** argv)
     }
 
     // BAR0 base for register access
-    volatile uint32_t * BAR0Base =
+    volatile uint32_t * baseBAR0 =
                 reinterpret_cast<volatile uint32_t *>(boardResource->pciInfo.BAR0Base);
 
     // Calculate the 'on' time for each LED in the cycle, in microseconds
@@ -133,10 +140,10 @@ main(int argc, char** argv)
 
     for (int t = 0; t < _nCycles; t++) {
         // user LED
-        NAVip_BrdInfoRegs_UserLed_SetUserLedEnable(BAR0Base,
+        NAVip_BrdInfoRegs_UserLed_SetUserLedEnable(baseBAR0,
             NAV_IP_BRD_INFO_USER_LED_CTRL_USER_LED_ON);
         usleep(onTimeUsecs);
-        NAVip_BrdInfoRegs_UserLed_SetUserLedEnable(BAR0Base,
+        NAVip_BrdInfoRegs_UserLed_SetUserLedEnable(baseBAR0,
             NAV_IP_BRD_INFO_USER_LED_CTRL_USER_LED_OFF);
         if (_exitNow) {
             break;
