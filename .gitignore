@@ -1,3 +1,5 @@
+*.o
+libPentek_xx821.a
 # Ignore Eclipse-generated files
 .cproject
 .project
