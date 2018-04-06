@@ -96,13 +96,13 @@ p_xx821::p_xx821(uint boardNum) :
     uint32_t maxReadReqSize;
     status = NAV_GetPcieLinkStatus(_boardHandle, &junk, &junk, &junk,
                                    &maxReadReqSize, &junk);
-    if (maxReadReqSize == 4096) {
+    if (maxReadReqSize != 4096) {
         WLOG << "_______________________";
         WLOG << "|";
         WLOG << "| PCIe 'max read request size' for board " << _boardNum;
         WLOG << "| is 4096 bytes. A Pentek bug will cause any";
         WLOG << "| DMA reads initiated by the board to time out";
-        WLOG << "| in this case. If DMA reads are required,";
+        WLOG << "| with this setting. If DMA reads are required,";
         WLOG << "| adjust PCIe 'max read request size' in the";
         WLOG << "| computer's BIOS settings to be 2048 bytes or";
         WLOG << "| smaller.";
