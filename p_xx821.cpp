@@ -87,6 +87,9 @@ p_xx821::p_xx821(uint boardNum) :
         throw ConstructError(os.str());
     }
 
+    // Log information about the board
+    _logBoardInfo();
+
     // DMA reads by Pentek boards apparently always fail if PCIe 'max read
     // request size' is 4096 bytes. (E.g., Pentek Navigator's 'transmit_dma'
     // example program will fail with DMA timeouts). Detect that case now,
@@ -96,11 +99,11 @@ p_xx821::p_xx821(uint boardNum) :
     uint32_t maxReadReqSize;
     status = NAV_GetPcieLinkStatus(_boardHandle, &junk, &junk, &junk,
                                    &maxReadReqSize, &junk);
-    if (maxReadReqSize != 4096) {
+    if (maxReadReqSize > 2048) {
         WLOG << "_______________________";
         WLOG << "|";
         WLOG << "| PCIe 'max read request size' for board " << _boardNum;
-        WLOG << "| is 4096 bytes. A Pentek bug will cause any";
+        WLOG << "| is " << maxReadReqSize << " bytes. A Pentek bug will cause any";
         WLOG << "| DMA reads initiated by the board to time out";
         WLOG << "| with this setting. If DMA reads are required,";
         WLOG << "| adjust PCIe 'max read request size' in the";
@@ -143,4 +146,35 @@ p_xx821::_CloseNavigatorOnLastInstance() {
         DLOG << "Closing Navigator BSP";
         NAV_BoardFinish();
     }
+}
+
+// Convenience function which converts a volatile pointer into a static pointer.
+// On systems which print zero as the value of a volatile pointer, this returns
+// a static address which will print normally. 
+static uint32_t*
+printablePtr(volatile uint32_t *vptr) {
+    return(const_cast<uint32_t*>(vptr));
+}
+
+void
+p_xx821::_logBoardInfo() {
+    DLOG << "Pentek xx821 board " << _boardNum << " info:";
+    DLOG << "    board info register base: " <<
+            printablePtr(_boardInfoRegBase());
+    ILOG << "    RAM DMA write base: " <<
+            printablePtr(_boardResource()->ipBaseAddr.ramDmaWrite);
+
+	// Log the offset (in 32-bit words) from _boardInfoBase() to the start of
+	// Pentek USER BLOCK 1
+    int wordOffset =
+            (_boardResource()->ipBaseAddr.userBlock[0] - _boardInfoRegBase()) / 4;
+    ILOG << "    User block 1 register base offset: 0x" << std::hex <<
+            wordOffset << "32-bit words";
+
+	// Log the offset (in 32-bit words) from _boardInfoBase() to the start of
+	// Pentek USER BLOCK 2
+    wordOffset =
+            (_boardResource()->ipBaseAddr.userBlock[1] - _boardInfoRegBase()) / 4;
+    ILOG << "    User block 2 register base offset: 0x" << std::hex <<
+            wordOffset << "32-bit words";
 }

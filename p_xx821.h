@@ -80,30 +80,29 @@ protected:
     /// as a pointer to NAV_BOARD_RESRC.
     /// @return the generic board handle pointer reinterpreted as a pointer to
     /// NAV_BOARD_RESRC.
-    NAV_BOARD_RESRC * _boardResource() {
+    NAV_BOARD_RESRC * _boardResource() const {
         return(reinterpret_cast<NAV_BOARD_RESRC *>(_boardHandle));
     }
 
-    /// @brief Return the BAR0 base address for card registers
-    /// @return the BAR0 base address for card registers
-    volatile uint32_t * _baseBAR0() {
-        return(reinterpret_cast<volatile uint32_t *>
-                    (_boardResource()->pciInfo.BAR0Base));
+    /// @brief Return the base address for the board information registers
+    /// @return the base address for the board information registers
+    volatile uint32_t * _boardInfoRegBase() const {
+        return(_boardResource()->ipBaseAddr.boardInfo);
     }
 
-    /// @brief Return the BAR2 base address for card registers
-    /// @return the BAR2 base address for card registers
-    volatile uint32_t * _baseBAR2() {
-        return(reinterpret_cast<volatile uint32_t *>
-                    (_boardResource()->pciInfo.BAR2Base));
+    /// @brief Return the base address of USER BLOCK 1
+    /// @return the base address of USER BLOCK 1
+    volatile uint32_t * _userBlock1Base() const {
+        return(_boardResource()->ipBaseAddr.userBlock[0]);
     }
 
-    /// @brief Return the BAR4 base address for card registers
-    /// @return the BAR4 base address for card registers
-    volatile uint32_t * _baseBAR4() {
-        return(reinterpret_cast<volatile uint32_t *>
-                    (_boardResource()->pciInfo.BAR4Base));
+    /// @brief Return the base address of USER BLOCK 2
+    /// @return the base address of USER BLOCK 2
+    volatile uint32_t * _userBlock2Base() const {
+        return(_boardResource()->ipBaseAddr.userBlock[1]);
     }
+    /// @brief Log board info
+    void _logBoardInfo();
 
     /// @brief Mutex for thread-safe access to instance members.
     mutable boost::recursive_mutex _mutex;
