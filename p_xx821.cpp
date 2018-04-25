@@ -178,21 +178,21 @@ printablePtr(volatile uint32_t *vptr) {
 std::string
 p_xx821::boardInfoString() const {
     std::ostringstream os;
-    os << "Pentek xx821 board " << _boardNum << " info:" << std::endl;
-    os << "    board info register base: " <<
+    os << "p_xx821 Board " << _boardNum << std::endl;
+    os << "    register base addr: " <<
           printablePtr(_boardInfoRegBase()) << std::endl;
-    os << "    RAM DMA write base: " <<
+    os << "    RAM DMA write base addr: " <<
           printablePtr(_boardResource()->ipBaseAddr.ramDmaWrite) << std::endl;
 
-	// Log the offset (in 32-bit words) from _boardInfoBase() to the start of
-	// Pentek USER BLOCK 1
+    // Log the offset (in 32-bit words) from _boardInfoBase() to the start of
+    // Pentek USER BLOCK 1
     int wordOffset =
             (_boardResource()->ipBaseAddr.userBlock[0] - _boardInfoRegBase()) / 4;
     os << "    User block 1 register base offset: 0x" << std::hex <<
           wordOffset << " 32-bit words" << std::endl;
 
-	// Log the offset (in 32-bit words) from _boardInfoBase() to the start of
-	// Pentek USER BLOCK 2
+    // Log the offset (in 32-bit words) from _boardInfoBase() to the start of
+    // Pentek USER BLOCK 2
     wordOffset =
             (_boardResource()->ipBaseAddr.userBlock[1] - _boardInfoRegBase()) / 4;
     os << "    User block 2 register base offset: 0x" << std::hex <<
