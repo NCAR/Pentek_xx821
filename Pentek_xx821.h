@@ -23,14 +23,14 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
 
 /*
- * p_xx821.h
+ * Pentek_xx821.h
  *
  *  Created on: Mar 27, 2018
  *      Author: Chris Burghart <burghart@ucar.edu>
  */
 
-#ifndef PENTEK_XX821_P_XX821_H_
-#define PENTEK_XX821_P_XX821_H_
+#ifndef PENTEK_XX821_H_
+#define PENTEK_XX821_H_
 
 #include <nav_common.h>
 #include <820_include/nav820.h>
@@ -44,16 +44,16 @@
 
 /// @brief Class which encapsulates access to a Pentek xx821-series transceiver
 /// card
-class p_xx821 {
+class Pentek_xx821 {
 public:
     /// @brief constructor
     /// @param boardNum number of the xx821 board to open (1 = first board,
     ///        2 = second board, etc.) [default = 1]j
     /// @throws ConstructError on error in construction
-    p_xx821(uint boardNum = 1);
+    Pentek_xx821(uint boardNum = 1);
 
     /// @brief destructor
-    virtual ~p_xx821();
+    virtual ~Pentek_xx821();
 
     class ConstructError : public virtual std::runtime_error {
     public:
@@ -73,7 +73,7 @@ protected:
     /// from the destructor.
     static void _CloseNavigatorOnLastInstance();
 
-    /// @brief Class-wide count of how many p_xx821 objects are
+    /// @brief Class-wide count of how many Pentek_xx821 objects are
     /// instantiated
     ///
     /// The instance count is kept so that Pentek's Navigator board support
@@ -122,4 +122,4 @@ protected:
     NAV_SYS_CONTEXT _appSysContext;
 };
 
-#endif /* PENTEK_XX821_P_XX821_H_ */
+#endif /* PENTEK_XX821_H_ */

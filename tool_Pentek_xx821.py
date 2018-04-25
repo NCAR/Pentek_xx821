@@ -20,11 +20,11 @@ variables.Update(env)
 env.AppendUnique(CXXFLAGS=['-std=c++11'])
 
 libsources = Split("""
-p_xx821.cpp
+Pentek_xx821.cpp
 """)
 
 headers = Split("""
-p_xx821.h
+Pentek_xx821.h
 """)
 
 libpentek = env.Library('Pentek_xx821', libsources)

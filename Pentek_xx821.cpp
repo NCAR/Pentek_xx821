@@ -23,7 +23,7 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
 
 /*
- * p_xx821.cpp
+ * Pentek_xx821.cpp
  *
  *  Created on: Mar 27, 2018
  *      Author: Chris Burghart <burghart@ucar.edu>
@@ -32,14 +32,14 @@
 #include <sstream>
 #include <logx/Logging.h>
 
-#include "p_xx821.h"
+#include "Pentek_xx821.h"
 
-LOGGING("p_xx821")
+LOGGING("Pentek_xx821")
 
 // Class-wide count of how many objects of this class are instantiated
-std::atomic<uint32_t> p_xx821::_InstanceCount(0);
+std::atomic<uint32_t> Pentek_xx821::_InstanceCount(0);
 
-p_xx821::p_xx821(uint boardNum) :
+Pentek_xx821::Pentek_xx821(uint boardNum) :
     _mutex(),
     _boardNum(boardNum),
     _boardHandle(NULL)
@@ -133,7 +133,7 @@ p_xx821::p_xx821(uint boardNum) :
     _InstanceCount++;
 }
 
-p_xx821::~p_xx821() {
+Pentek_xx821::~Pentek_xx821() {
     boost::recursive_mutex::scoped_lock guard(_mutex);
 
     // Decrement the instance count.
@@ -155,12 +155,12 @@ p_xx821::~p_xx821() {
                 NavApiStatus[status];
     }
 
-    // Close Navigator BSP if this is the last p_xx821 instance
+    // Close Navigator BSP if this is the last Pentek_xx821 instance
     _CloseNavigatorOnLastInstance();
 }
 
 void
-p_xx821::_CloseNavigatorOnLastInstance() {
+Pentek_xx821::_CloseNavigatorOnLastInstance() {
     if (_InstanceCount == 0) {
         DLOG << "Closing Navigator BSP";
         NAV_BoardFinish();
@@ -176,9 +176,9 @@ printablePtr(volatile uint32_t *vptr) {
 }
 
 std::string
-p_xx821::boardInfoString() const {
+Pentek_xx821::boardInfoString() const {
     std::ostringstream os;
-    os << "p_xx821 Board " << _boardNum << std::endl;
+    os << "Pentek_xx821 Board " << _boardNum << std::endl;
     os << "    register base addr: " <<
           printablePtr(_boardInfoRegBase()) << std::endl;
     os << "    RAM DMA write base addr: " <<
