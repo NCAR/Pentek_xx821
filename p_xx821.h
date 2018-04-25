@@ -59,6 +59,12 @@ public:
     public:
         ConstructError(std::string msg) : std::runtime_error(msg) {}
     };
+
+    /// @brief Return a string with information about the board and
+    /// configuration
+    /// @return a string with information about the board and configuration
+    virtual std::string boardInfoString() const;
+
 protected:
     /// @brief Close the Navigator BSP if there are no instantiated objects
     /// which need it.
@@ -101,8 +107,6 @@ protected:
     volatile uint32_t * _userBlock2Base() const {
         return(_boardResource()->ipBaseAddr.userBlock[1]);
     }
-    /// @brief Log board info
-    void _logBoardInfo();
 
     /// @brief Mutex for thread-safe access to instance members.
     mutable boost::recursive_mutex _mutex;
