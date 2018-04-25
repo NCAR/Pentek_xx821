@@ -91,6 +91,17 @@ p_xx821::p_xx821(uint boardNum) :
         throw ConstructError(os.str());
     }
 
+    // Initialize the context for system specific resources (semaphores,
+    // signals, etc.)
+    status = NAVsys_Init(&_appSysContext);
+    if (status != NAV_STAT_OK)
+    {
+        _CloseNavigatorOnLastInstance();
+        std::ostringstream os;
+        os << "Error from NAVsys_Init: " << NavApiStatus[status];
+        throw ConstructError(os.str());
+    }
+
     // DMA reads by Pentek boards apparently always fail if PCIe 'max read
     // request size' is 4096 bytes. (E.g., Pentek Navigator's 'transmit_dma'
     // example program will fail with DMA timeouts). Detect that case now,
@@ -128,8 +139,15 @@ p_xx821::~p_xx821() {
     // Decrement the instance count.
     _InstanceCount--;
 
+    // Uninit system resources
+    int32_t status = NAVsys_UnInit(&_appSysContext);
+    if (status != NAV_STAT_OK) {
+        ELOG << "NAVsys_UnInit error for Pentek xx821 board " << _boardNum <<
+                ": " << NavApiStatus[status];
+    }
+
     // Close the board
-    int32_t status = NAV_BoardClose(_boardHandle);
+    status = NAV_BoardClose(_boardHandle);
     if (status == NAV_STAT_OK) {
         ILOG << "Closed Pentek xx821 board " << _boardNum;
     } else {

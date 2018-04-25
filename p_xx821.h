@@ -117,6 +117,9 @@ protected:
     /// @brief Board handle pointer returned by Navigator
     void * _boardHandle;
 
+    /// @brief Context for system resources like semaphores, signal handlers,
+    /// etc.
+    NAV_SYS_CONTEXT _appSysContext;
 };
 
 #endif /* PENTEK_XX821_P_XX821_H_ */
