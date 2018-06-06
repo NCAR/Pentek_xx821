@@ -48,7 +48,7 @@ class Pentek_xx821 {
 public:
     /// @brief constructor
     /// @param boardNum number of the xx821 board to open (1 = first board,
-    ///        2 = second board, etc.) [default = 1]j
+    /// 2 = second board, etc.) [default = 1]
     /// @throws ConstructError on error in construction
     Pentek_xx821(uint boardNum = 1);
 
