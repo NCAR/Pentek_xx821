@@ -39,68 +39,52 @@ LOGGING("Pentek_xx821")
 // Class-wide count of how many objects of this class are instantiated
 std::atomic<uint32_t> Pentek_xx821::_InstanceCount(0);
 
-Pentek_xx821::Pentek_xx821(uint boardNum) :
+Pentek_xx821::Pentek_xx821(uint16_t boardNum) :
     _mutex(),
     _boardNum(boardNum),
     _boardHandle(NULL)
 {
     boost::recursive_mutex::scoped_lock guard(_mutex);
 
-    // Initialize the Navigator board support package
-    int32_t status = NAV_BoardStartup();
-    if (status != NAV_STAT_OK) {
-        _CloseNavigatorOnLastInstance();
-        std::ostringstream os;
-        os << "Error initializing Navigator BSP: " << NavApiStatus[status];
-        throw ConstructError(os.str());
-    } else {
-        if (_InstanceCount == 0) {
-            DLOG << "Opening Navigator BSP";
-        }
+    // Holder for status value returned by NAV_xxx() functions
+    int32_t status;
+
+    // Initialize the Navigator board support package when the first instance
+    // is being constructed.
+    if (_InstanceCount == 0) {
+        status = NAV_BoardStartup();
+        _AbortCtorOnNavStatusError(status, "NAV_BoardStartup");
+        DLOG << "Opened Navigator BSP";
     }
 
     // Find all Pentek boards in the system
     NAV_DEVICE_INFO *boardList[NAV_MAX_BOARDS];
     int32_t numBoards;
     status = NAV_BoardFind(0, boardList, &numBoards);
-    if (status != NAV_STAT_OK)
-    {
-        _CloseNavigatorOnLastInstance();
-        std::ostringstream os;
-        os << "Error from NAV_BoardFind: " << NavApiStatus[status];
-        throw ConstructError(os.str());
-    }
+    _AbortCtorOnNavStatusError(status, "NAV_BoardFind");
 
     DLOG << numBoards << ((numBoards == 1) ? " board " : " boards ") << "found";
 
     // Make sure the requested board number is valid
     if (_boardNum > numBoards) {
-        _CloseNavigatorOnLastInstance();
         std::ostringstream os;
         os << "Cannot open Pentex_xx821 board " << _boardNum << " (only " <<
               numBoards << " installed)";
-        throw ConstructError(os.str());
+        _AbortConstruction(os.str());
     }
 
     // Open the board
     _boardHandle = NAV_BoardOpen(boardList[_boardNum - 1], 0);
     if (_boardHandle == NULL) {
-        _CloseNavigatorOnLastInstance();
         std::ostringstream os;
         os << "NAV_BoardOpen error opening board " << _boardNum;
-        throw ConstructError(os.str());
+        _AbortConstruction(os.str());
     }
 
     // Initialize the context for system specific resources (semaphores,
     // signals, etc.)
     status = NAVsys_Init(&_appSysContext);
-    if (status != NAV_STAT_OK)
-    {
-        _CloseNavigatorOnLastInstance();
-        std::ostringstream os;
-        os << "Error from NAVsys_Init: " << NavApiStatus[status];
-        throw ConstructError(os.str());
-    }
+    _AbortCtorOnNavStatusError(status, "NAVsys_Init");
 
     // DMA reads by Pentek boards apparently always fail if PCIe 'max read
     // request size' is 4096 bytes. (E.g., Pentek Navigator's 'transmit_dma'
@@ -157,6 +141,22 @@ Pentek_xx821::~Pentek_xx821() {
 
     // Close Navigator BSP if this is the last Pentek_xx821 instance
     _CloseNavigatorOnLastInstance();
+}
+
+void
+Pentek_xx821::_AbortCtorOnNavStatusError(int status,
+                                         const std::string & funcName) {
+    if (status != NAV_STAT_OK) {
+        std::ostringstream os;
+        os << "Error in call to " << funcName << "(): " << NavApiStatus[status];
+        _AbortConstruction(os.str());
+    }
+}
+
+void
+Pentek_xx821::_AbortConstruction(const std::string & msg) {
+    _CloseNavigatorOnLastInstance();
+    throw ConstructError(msg);
 }
 
 void

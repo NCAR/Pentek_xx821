@@ -37,7 +37,7 @@
 
 #include <boost/thread/recursive_mutex.hpp>
 
-#include <stdint.h>
+#include <cstdint>
 #include <atomic>
 #include <exception>
 #include <string>
@@ -50,7 +50,7 @@ public:
     /// @param boardNum number of the xx821 board to open (1 = first board,
     /// 2 = second board, etc.) [default = 1]
     /// @throws ConstructError on error in construction
-    Pentek_xx821(uint boardNum = 1);
+    Pentek_xx821(uint16_t boardNum = 1);
 
     /// @brief destructor
     virtual ~Pentek_xx821();
@@ -72,15 +72,6 @@ protected:
     /// This is called from the constructor before throwing an exception, and
     /// from the destructor.
     static void _CloseNavigatorOnLastInstance();
-
-    /// @brief Class-wide count of how many Pentek_xx821 objects are
-    /// instantiated
-    ///
-    /// The instance count is kept so that Pentek's Navigator board support
-    /// package can be closed as the last object using it is destroyed.
-    ///
-    /// This member is atomic to allow for thread-safe access.
-    static std::atomic<uint> _InstanceCount;
 
     /// @brief Return the generic (void*) board handle pointer reinterpreted
     /// as a pointer to NAV_BOARD_RESRC.
@@ -108,11 +99,22 @@ protected:
         return(_boardResource()->ipBaseAddr.userBlock[1]);
     }
 
+    /// @brief Throw ConstructError if the given status from a NAV_xxx()
+    /// function call is an error
+    /// @param status the status value returned by a NAV_xxx() function call
+    /// @param funcName the name of the function which returned the status
+    static void _AbortCtorOnNavStatusError(int status,
+                                           const std::string & funcName);
+
+    /// @brief Throw ConstructError with the given message and clean up
+    /// @param msg message describing the construction error
+    static void _AbortConstruction(const std::string & msg);
+
     /// @brief Mutex for thread-safe access to instance members.
     mutable boost::recursive_mutex _mutex;
 
     /// @brief Number of the associated xx821 board
-    uint _boardNum;
+    uint16_t _boardNum;
 
     /// @brief Board handle pointer returned by Navigator
     void * _boardHandle;
@@ -120,6 +122,18 @@ protected:
     /// @brief Context for system resources like semaphores, signal handlers,
     /// etc.
     NAV_SYS_CONTEXT _appSysContext;
+private:
+    /// @brief Class-wide count of how many Pentek_xx821 objects are
+    /// instantiated
+    ///
+    /// The instance count is kept so that Pentek's Navigator board support
+    /// package can be closed as the last object using it is destroyed.
+    ///
+    /// This member is atomic to allow for thread-safe access, and private
+    /// because only this base class deals with Navigator BSP open and close.
+    static std::atomic<uint> _InstanceCount;
+
+
 };
 
 #endif /* PENTEK_XX821_H_ */
