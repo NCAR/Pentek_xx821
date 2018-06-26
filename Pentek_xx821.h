@@ -65,6 +65,14 @@ public:
     /// @return a string with information about the board and configuration
     virtual std::string boardInfoString() const;
 
+    /// @brief Return the number of ADC channels on the board
+    /// @return the number of ADC channels on the board
+    int32_t adcCount() const { return(_adcCount); }
+
+    /// @brief Return the number of DAC channels on the board
+    /// @return the number of DAC channels on the board
+    int32_t dacCount() const { return(_dacCount); }
+
 protected:
     /// @brief Close the Navigator BSP if there are no instantiated objects
     /// which need it.
@@ -122,6 +130,13 @@ protected:
     /// @brief Context for system resources like semaphores, signal handlers,
     /// etc.
     NAV_SYS_CONTEXT _appSysContext;
+
+    /// @brief Count of ADCs on the board
+    int32_t _adcCount;
+
+    /// @brief Count of DACs on the board
+    int32_t _dacCount;
+
 private:
     /// @brief Class-wide count of how many Pentek_xx821 objects are
     /// instantiated

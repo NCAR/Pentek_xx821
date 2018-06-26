@@ -95,6 +95,8 @@ Pentek_xx821::Pentek_xx821(uint16_t boardNum) :
     uint32_t maxReadReqSize;
     status = NAV_GetPcieLinkStatus(_boardHandle, &junk, &junk, &junk,
                                    &maxReadReqSize, &junk);
+    _AbortCtorOnNavStatusError(status, "NAV_GetPcieLinkStatus");
+
     if (maxReadReqSize > 2048) {
         WLOG << "_______________________";
         WLOG << "|";
@@ -111,6 +113,16 @@ Pentek_xx821::Pentek_xx821(uint16_t boardNum) :
         DLOG << "PCIe 'max read request size' for board " << _boardNum <<
                 " is " << maxReadReqSize << " bytes";
     }
+
+    // Get the ADC channel count for this board and store it in _adcCount
+    status = NAV_GetBoardSpec(_boardHandle, NAV_BOARD_SPEC_ADC_CHAN_COUNT,
+                              &_adcCount);
+    _AbortCtorOnNavStatusError(status, "NAV_GetBoardSpec");
+
+    // Get the DAC channel count for this board and store it in _dacCount
+    status = NAV_GetBoardSpec(_boardHandle, NAV_BOARD_SPEC_DAC_CHAN_COUNT,
+                              &_dacCount);
+    _AbortCtorOnNavStatusError(status, "NAV_GetBoardSpec");
 
     // We're good, so increment the _InstanceCount.
     ILOG << "Opened Pentek xx821 board " << _boardNum;
@@ -195,5 +207,10 @@ Pentek_xx821::boardInfoString() const {
             (_boardResource()->ipBaseAddr.userBlock[1] - _boardInfoRegBase()) / 4;
     os << "    User block 2 offset from register base: 0x" << std::hex <<
           wordOffset << " 32-bit words" << std::endl;
+
+    // ADC and DAC channel counts
+    os << "    " << _adcCount << " ADC channels" << std::endl;
+    os << "    " << _dacCount << " DAC channels" << std::endl;
+
     return(os.str());
 }
