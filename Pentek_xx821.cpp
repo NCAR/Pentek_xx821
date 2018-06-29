@@ -66,7 +66,7 @@ Pentek_xx821::Pentek_xx821(uint16_t boardNum) :
     DLOG << numBoards << ((numBoards == 1) ? " board " : " boards ") << "found";
 
     // Make sure the requested board number is valid
-    if (_boardNum > numBoards) {
+    if (_boardNum >= numBoards) {
         std::ostringstream os;
         os << "Cannot open Pentex_xx821 board " << _boardNum << " (only " <<
               numBoards << " installed)";
@@ -74,7 +74,7 @@ Pentek_xx821::Pentek_xx821(uint16_t boardNum) :
     }
 
     // Open the board
-    _boardHandle = NAV_BoardOpen(boardList[_boardNum - 1], 0);
+    _boardHandle = NAV_BoardOpen(boardList[_boardNum], 0);
     if (_boardHandle == NULL) {
         std::ostringstream os;
         os << "NAV_BoardOpen error opening board " << _boardNum;

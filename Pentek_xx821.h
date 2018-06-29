@@ -47,10 +47,10 @@
 class Pentek_xx821 {
 public:
     /// @brief constructor
-    /// @param boardNum number of the xx821 board to open (1 = first board,
-    /// 2 = second board, etc.) [default = 1]
+    /// @param boardNum number of the xx821 board to open (0 = first board,
+    /// 1 = second board, etc.) [default = 0]
     /// @throws ConstructError on error in construction
-    Pentek_xx821(uint16_t boardNum = 1);
+    Pentek_xx821(uint16_t boardNum = 0);
 
     /// @brief destructor
     virtual ~Pentek_xx821();
