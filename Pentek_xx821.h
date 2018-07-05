@@ -118,6 +118,12 @@ protected:
     /// @param msg message describing the construction error
     static void _AbortConstruction(const std::string & msg);
 
+    /// @brief Log an error message if the given Navigator status value is
+    /// anything other than NAV_STAT_OK.
+    /// @param status the status value returned by a Navigator function call
+    /// @param prefix a string to be prepended to the error log message, if any
+    static void _LogNavigatorError(int status, std::string prefix = "");
+
     /// @brief Mutex for thread-safe access to instance members.
     mutable boost::recursive_mutex _mutex;
 

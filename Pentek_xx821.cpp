@@ -172,6 +172,12 @@ Pentek_xx821::_AbortConstruction(const std::string & msg) {
 }
 
 void
+Pentek_xx821::_LogNavigatorError(int status, std::string prefix) {
+    if (status != NAV_STAT_OK) {
+        ELOG << prefix << ": " << NavApiStatus[status];
+    }
+}
+void
 Pentek_xx821::_CloseNavigatorOnLastInstance() {
     if (_InstanceCount == 0) {
         DLOG << "Closing Navigator BSP";
