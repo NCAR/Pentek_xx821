@@ -119,6 +119,11 @@ Pentek_xx821::Pentek_xx821(uint16_t boardNum) :
                               &_adcCount);
     _AbortCtorOnNavStatusError(status, "NAV_GetBoardSpec");
 
+    // Get the DDC instance count for this board and store it in _ddcCount
+    status = NAV_GetBoardSpec(_boardHandle, NAV_BOARD_SPEC_DDC_CHAN_COUNT,
+                              &_ddcCount);
+    _AbortCtorOnNavStatusError(status, "NAV_GetBoardSpec");
+
     // Get the DAC channel count for this board and store it in _dacCount
     status = NAV_GetBoardSpec(_boardHandle, NAV_BOARD_SPEC_DAC_CHAN_COUNT,
                               &_dacCount);

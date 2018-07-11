@@ -140,6 +140,9 @@ protected:
     /// @brief Count of ADCs on the board
     int32_t _adcCount;
 
+    /// @brief Count of DDC instances on the board
+    int32_t _ddcCount;
+
     /// @brief Count of DACs on the board
     int32_t _dacCount;
 
