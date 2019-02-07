@@ -7,6 +7,7 @@ import eol_scons
 # setting the configuration variable.
 
 requiredTools = [
+    'boost_thread',
     'logx',
     'Navigator_xx821', # Pentek's Navigator BSP
     'doxygen',
