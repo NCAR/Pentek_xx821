@@ -146,6 +146,66 @@ protected:
     /// @brief Count of DACs on the board
     int32_t _dacCount;
 
+    /// @brief Write a 32-bit unsigned value to the given AXI LITE register
+    /// address
+    /// @param regaddr the address of the target register
+    /// @param val the 32-bit value to write
+    /// @param action the name of the action being performed by the register
+    /// write, used to build a message when throwing an exception
+    void writeLiteRegister_(uint32_t regaddr, uint32_t val,
+                            const std::string & action = "") const
+    {
+        NavRegWrite(_boardResource()->ipBaseAddr.boardInfo + regaddr/4, 0xffffffffUL, val);
+    }
+
+    /// @brief Write a 32-bit signed value to the given AXI LITE register
+    /// address
+    /// @param regaddr the address of the target register
+    /// @param val the 32-bit value to write
+    /// @param action the name of the action being performed by the register
+    /// write, used to build a message when throwing an exception
+    void writeLiteRegister_(uint32_t regaddr, int32_t val,
+                            const std::string & action = "") const
+    {
+        // Quick implementation just reinterprets the signed value as unsigned
+        // and calls the uint32_t version above...
+        uint32_t * uValPtr = reinterpret_cast<uint32_t *>(&val);
+        writeLiteRegister_(regaddr, *uValPtr, action);
+    }
+
+    /// @brief Template to write a vector of values to a block of consecutive
+    /// AXI LITE registers at a given starting address
+    ///
+    /// Currently supported types are uint32_t and int32_t.
+    /// @param blockbase the register block base address
+    /// @param vals the vector of 32-bit values to write
+    /// @param action the name of the action being performed by the register
+    /// write, used to build a message when throwing an exception
+    template <typename T>
+    void writeLiteRegisterBlock_(uint32_t blockbase,
+                                 const std::vector<T> & vals,
+                                 const std::string & action = "") const
+    {
+        for (int ndx = 0; ndx < vals.size(); ndx++)
+        {
+            std::ostringstream oss;
+            oss << action << " at ndx " << ndx;
+            writeLiteRegister_(blockbase + 4 * ndx, vals[ndx], oss.str());
+        }
+    }
+
+    /// @brief Read a 32-bit value from the given AXI LITE register address and
+    /// return the result
+    /// @param regaddr the address of the source register
+    /// @param action the name of the action being performed by the register
+    /// write, used to build a message when throwing an exception
+    /// @return the 32-bit value read from the given register
+    uint32_t readLiteRegister_(uint32_t regaddr,
+                               const std::string &action = "") const
+    {
+       return NavRegRead(_boardResource()->ipBaseAddr.boardInfo + regaddr/4, 0xffffffffUL);
+    }
+
 private:
     /// @brief Class-wide count of how many Pentek_xx821 objects are
     /// instantiated
